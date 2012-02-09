@@ -109,6 +109,7 @@ class ArticlesGenerator(Generator):
         self.authors = defaultdict(list)
         super(ArticlesGenerator, self).__init__(*args, **kwargs)
         self.drafts = []
+        self.noindex = []
 
     def generate_feeds(self, writer):
         """Generate the feeds from the current context, and output files."""
@@ -203,6 +204,10 @@ class ArticlesGenerator(Generator):
             write('drafts/%s.html' % article.slug, article_template, self.context,
                     article=article, category=article.category)
 
+        for article in self.noindex:
+            write('%s.html' % article.slug, article_template, self.context,
+                    article=article, category=article.category)
+
 
     def generate_context(self):
         """change the context"""
@@ -211,7 +216,7 @@ class ArticlesGenerator(Generator):
         files = self.get_files(self.path, exclude=['pages',])
         all_articles = []
         for f in files:
-            
+
             try:
                 content, metadata = read_file(f, settings=self.settings)
             except Exception, e:
@@ -260,6 +265,8 @@ class ArticlesGenerator(Generator):
                 all_articles.append(article)
             elif article.status == "draft":
                 self.drafts.append(article)
+            elif article.status == "noindex":
+                self.noindex.append(article)
 
         self.articles, self.translations = process_translations(all_articles)
 
